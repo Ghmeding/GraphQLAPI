@@ -39,7 +39,7 @@ const Mutation = new GraphQLObjectType({
                 password: { type: GraphQLString }
             },
             resolve(parent, args){
-                //SQL insertion here
+                //SQL insertion here 
                 //password encrypt here
                 userData.push({id: userData.length + 1, firstName: args.firstName, lastName: args.lastName, email: args.email, password: args.password});
                 return args

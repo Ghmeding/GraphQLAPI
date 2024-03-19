@@ -1,8 +1,16 @@
 import React, { useEffect, useState } from 'react'
 import './Form.css'; 
 import { CREATE_USER_MUTATION } from '../GraphQL/Mutations';
-import { useMutation } from '@apollo/client';
-import { create } from 'domain';
+import { useMutation, useQuery } from '@apollo/client';
+import { LOAD_USERS } from '../GraphQL/Queries';
+
+interface User {
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+  }
 
 
 const Form = () => {
@@ -11,8 +19,11 @@ const Form = () => {
     const [lastName, setLastName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [users, setUsers] = useState([]);
+    const [fetchUsers, setFetchUsers] = useState(false);
 
-    const [createUser, { error, data }] = useMutation(CREATE_USER_MUTATION);
+    const [createUser, { error: mutationError, data: mutationData }] = useMutation(CREATE_USER_MUTATION);
+    const {error, loading, data: queryData} = useQuery(LOAD_USERS);
 
     const addUser = async() => {
         try {
@@ -31,15 +42,24 @@ const Form = () => {
         }
     };
 
+    const getAllUsers = async() => {
+        try {
+            const users = await queryData.getAllUsers;
+            setUsers(users);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     //Will run after each succesful render
     useEffect(() => {
-        if (data && !error) { //check if there is data
+        if (mutationData) { //check if there is data
             setFirstName('');
             setLastName('');
             setEmail('');
             setPassword('');
         }
-    }, [data]);
+    }, [mutationData]);
 
     return (
         <div>
@@ -78,6 +98,10 @@ const Form = () => {
                     }}
                 />
                 <button onClick={addUser}>Create User</button>
+                <button onClick={getAllUsers}>Get All Users</button>
+                {users.map((user: User) => (
+                    <p>{user.firstName}</p>
+                ))}
             </div>
         </div>
   )
